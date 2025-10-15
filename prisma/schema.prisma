@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// schema.prisma
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String
+  address   String?
+  results   Result[] // all results requested by this user
+}
+
+model Result {
+  id        String   @id @default(uuid())
+  theta1    Float
+  theta2    Float
+  theta3    Float
+  time      Json
+  x1        Json
+  y1        Json
+  x2        Json
+  y2        Json
+  x3        Json
+  y3        Json
+  createdAt DateTime @default(now())
+  
+  userId    Int?     // optional: who requested it
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@unique([theta1, theta2, theta3]) // ensures one result per unique angle set
+}
+
