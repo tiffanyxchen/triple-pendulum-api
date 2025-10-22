@@ -1,12 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -14,36 +7,45 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// schema.prisma
-
 model User {
+  id      Int      @id @default(autoincrement())
+  email   String   @unique
+  name    String
+  address String?
+  roles   String[]
+  orders  Order[]
+}
+
+model Order {
   id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String
-  address   String?
-  results   Result[] // all results requested by this user
+  // total     Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  results   Result[]
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id])
 }
 
 model Result {
-  id        String   @id @default(uuid())
-  theta1_init    Float
-  theta2_init    Float
-  theta3_init    Float
+  id            String   @id @default(uuid())
+  name          String    @default("Untitled")
+  time          Json
+  x1            Json
+  y1            Json
+  x2            Json
+  y2            Json
+  x3            Json
+  y3            Json
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt @default(now())
+  theta1_init   Float
   theta1_series Json
+  theta2_init   Float
   theta2_series Json
+  theta3_init   Float
   theta3_series Json
-  time      Json
-  x1        Json
-  y1        Json
-  x2        Json
-  y2        Json
-  x3        Json
-  y3        Json
-  createdAt DateTime @default(now())
-  
-  userId    Int?     // optional: who requested it
-  user      User?    @relation(fields: [userId], references: [id])
 
-  @@unique([theta1_init, theta2_init, theta3_init]) // ensures one result per unique angle set
+  orders Order[]
+
+  @@unique([theta1_init, theta2_init, theta3_init])
 }
-

@@ -14,6 +14,12 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
+    "paths": {                 
+      "@utils/*": ["src/utils/*"],
+      "@services/*": ["src/*/*.service.ts"],
+      "@controllers/*": ["src/*/*.controller.ts"]
+    },
+
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
@@ -21,5 +27,7 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false
-  }
+  },
+
+  "include": ["src"]  
 }

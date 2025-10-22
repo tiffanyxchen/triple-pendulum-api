@@ -11,10 +11,9 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ResultsService } from './results.service';
-import { Result } from 'results.interface';
-import { User } from 'results.interface';
-import { CreateResultDto } from 'results.interface';
-import { UpdateResultDto } from 'results.interface';
+import { Result } from './results.interface';
+import { CreateResultDto } from './results.interface';
+import { UpdateResultDto } from './results.interface';
 
 @Controller('v1/results')
 export class ResultsV1Controller {

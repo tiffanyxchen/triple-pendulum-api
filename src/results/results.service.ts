@@ -1,12 +1,13 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Prisma, Result } from '@prisma/client';
 import { PrismaService } from '../utils/prisma.service';
-import { CreateResultDto, UpdateResultDto } from './results.interface'; // DTOs for validation
+import { CreateResultDto, UpdateResultDto } from './results.interface';
 
 @Injectable()
 export class ResultsService {
-  constructor(private prisma: PrismaService) {}
   private readonly logger = new Logger(ResultsService.name);
+
+  constructor(private readonly prisma: PrismaService) {}
 
   // ✅ Get all results
   public async results(params: {
@@ -17,40 +18,39 @@ export class ResultsService {
     orderBy?: Prisma.ResultOrderByWithRelationInput;
   }): Promise<Result[]> {
     this.logger.log('GET /results - Fetching all results');
-    return await this.prisma.result.findMany(params);
+    return this.prisma.result.findMany(params);
   }
 
   // ✅ Get a single result by ID
   public async result(where: Prisma.ResultWhereUniqueInput): Promise<Result | null> {
     this.logger.log(`Fetching result with ID: ${where.id}`);
-    return await this.prisma.result.findUnique({ where });
+    return this.prisma.result.findUnique({ where });
   }
 
   // ✅ Create a new result record
   public async createResult(data: CreateResultDto): Promise<Result> {
     this.logger.log('Creating a new result entry');
-
     try {
-      const newResult = await this.prisma.result.create({
+      return await this.prisma.result.create({
         data: {
+          name: data.name ?? 'Untitled',
           theta1_init: data.theta1_init,
           theta2_init: data.theta2_init,
           theta3_init: data.theta3_init,
-          theta1_series: data.theta1_series,
-          theta2_series: data.theta2_series,
-          theta3_series: data.theta3_series,
-          time: data.time,
-          x1: data.x1,
-          y1: data.y1,
-          x2: data.x2,
-          y2: data.y2,
-          x3: data.x3,
-          y3: data.y3,
-          userId: data.userId ?? null, // Optional field
-        },
+          theta1_series: data.theta1_series as Prisma.InputJsonValue,
+          theta2_series: data.theta2_series as Prisma.InputJsonValue,
+          theta3_series: data.theta3_series as Prisma.InputJsonValue,
+          time: data.time as Prisma.InputJsonValue,
+          x1: data.x1 as Prisma.InputJsonValue,
+          y1: data.y1 as Prisma.InputJsonValue,
+          x2: data.x2 as Prisma.InputJsonValue,
+          y2: data.y2 as Prisma.InputJsonValue,
+          x3: data.x3 as Prisma.InputJsonValue,
+          y3: data.y3 as Prisma.InputJsonValue,
+          },
       });
-      return newResult;
     } catch (err) {
+      this.logger.error('Error creating result', err);
       throw new HttpException(err.message, HttpStatus.CONFLICT);
     }
   }
@@ -62,24 +62,40 @@ export class ResultsService {
   }): Promise<Result> {
     const { where, data } = params;
     this.logger.log(`Updating result ${where.id}`);
-
-    try:
-      const updatedResult = await this.prisma.result.update({
+    try {
+      return await this.prisma.result.update({
         where,
         data: {
-          ...data,
-          updatedAt: new Date(),
+          name: data.name ?? 'Untitled',
+          theta1_init: data.theta1_init,
+          theta2_init: data.theta2_init,
+          theta3_init: data.theta3_init,
+          theta1_series: data.theta1_series as Prisma.InputJsonValue,
+          theta2_series: data.theta2_series as Prisma.InputJsonValue,
+          theta3_series: data.theta3_series as Prisma.InputJsonValue,
+          time: data.time as Prisma.InputJsonValue,
+          x1: data.x1 as Prisma.InputJsonValue,
+          y1: data.y1 as Prisma.InputJsonValue,
+          x2: data.x2 as Prisma.InputJsonValue,
+          y2: data.y2 as Prisma.InputJsonValue,
+          x3: data.x3 as Prisma.InputJsonValue,
+          y3: data.y3 as Prisma.InputJsonValue,
         },
       });
-      return updatedResult;
     } catch (err) {
-      throw new HttpException('Failed to update result', HttpStatus.CONFLICT);
+      this.logger.error(`Error updating result ${where.id}`, err);
+      throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
     }
   }
 
   // ✅ Delete a result
   public async deleteResult(where: Prisma.ResultWhereUniqueInput): Promise<Result> {
     this.logger.log(`Deleting result ${where.id}`);
-    return await this.prisma.result.delete({ where, });
+    try {
+      return await this.prisma.result.delete({ where });
+    } catch (err) {
+      this.logger.error(`Error deleting result ${where.id}`, err);
+      throw new HttpException('Failed to delete result', HttpStatus.NOT_FOUND);
+    }
   }
 }
