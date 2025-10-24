@@ -1,31 +1,34 @@
-import { IsNotEmpty, IsNumber, IsArray, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsArray, IsUUID, IsOptional } from 'class-validator';
+import { Prisma } from '@prisma/client';
 
 //
 // ---------- Prisma Entity Types ----------
 //
 
-// This matches your Prisma `Result` model
+// ✅ Matches your Prisma `Result` model
 export type Result = {
   id: string;
+  name: string;
   theta1_init: number;
   theta2_init: number;
   theta3_init: number;
-  theta1_series: number[];
-  theta2_series: number[];
-  theta3_series: number[];
-  time: number[];
-  x1: number[];
-  y1: number[];
-  x2: number[];
-  y2: number[];
-  x3: number[];
-  y3: number[];
+  theta1_series: Prisma.JsonValue;
+  theta2_series: Prisma.JsonValue;
+  theta3_series: Prisma.JsonValue;
+  time: Prisma.JsonValue;
+  x1: Prisma.JsonValue;
+  y1: Prisma.JsonValue;
+  x2: Prisma.JsonValue;
+  y2: Prisma.JsonValue;
+  x3: Prisma.JsonValue;
+  y3: Prisma.JsonValue;
   createdAt: Date;
+  updatedAt: Date;
   orderId?: number | null;
   userId?: number | null;
 };
 
-// This matches your Prisma `User` model
+// ✅ Matches your Prisma `User` model
 export type User = {
   id: number;
   email: string;
@@ -34,12 +37,12 @@ export type User = {
   roles: string[];
 };
 
+// ✅ Matches your Prisma `Order` model (no total field)
 export interface Order {
   id: number;
-  total: number;
   createdAt: Date;
   updatedAt: Date;
-  userId: number;
+  userId?: number | null;
   results: Result[];
 }
 
@@ -47,11 +50,10 @@ export interface Order {
 // ---------- DTOs for Validation ----------
 //
 
+// ✅ DTO for creating a new Order
 export class CreateOrderDto {
   @IsNumber()
-  total: number;
-
-  @IsNumber()
+  @IsNotEmpty()
   userId: number;
 
   @IsArray()
@@ -60,11 +62,15 @@ export class CreateOrderDto {
   results: string[]; // UUIDs of existing Result records
 }
 
+// ✅ DTO for updating an Order
 export class UpdateOrderDto {
+  @IsOptional()
   @IsNumber()
-  total: number;
+  userId?: number; // ✅ now explicitly marked optional
 
+  @IsOptional()
   @IsArray()
   @IsUUID('all', { each: true })
-  results: string[];
+  results?: string[]; // ✅ also optional to allow partial updates
 }
+

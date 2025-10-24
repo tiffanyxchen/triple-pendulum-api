@@ -11,18 +11,18 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { CreateOrderDto, Order, UpdateOrderDto } from './orders.interface';
+import { CreateOrderDto, UpdateOrderDto } from './orders.interface';
 import { OrdersService } from './orders.service';
+import { Order } from '@prisma/client';
 
 @Controller('v1/orders')
 export class OrdersV1Controller {
   constructor(private readonly ordersService: OrdersService) {}
-  private readonly logger = new Logger(OrdersService.name);
+  private readonly logger = new Logger(OrdersV1Controller.name);
 
+  // ✅ CREATE a new order
   @Post()
-  public async create(
-    @Body() order: CreateOrderDto
-  ): Promise<Order> {
+  public async create(@Body() order: CreateOrderDto): Promise<Order> {
     if (!order) {
       throw new HttpException('No order data', HttpStatus.BAD_REQUEST);
     }
@@ -32,33 +32,30 @@ export class OrdersV1Controller {
     if (!order.results || order.results.length === 0) {
       throw new HttpException('No results in order', HttpStatus.CONFLICT);
     }
-    if (!order.total) {
-      throw new HttpException('No order total', HttpStatus.CONFLICT);
-    }
 
     try {
       const newOrder = await this.ordersService.createOrder(order);
       return newOrder;
     } catch (err) {
       this.logger.error(err);
-      throw new HttpException('Something happened', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException('Failed to create order', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
+  // ✅ GET all orders
   @Get()
   public async orders(): Promise<Order[]> {
     try {
       return await this.ordersService.orders({});
     } catch (err) {
       this.logger.error(err);
-      throw new HttpException('Generic', HttpStatus.BAD_GATEWAY);
+      throw new HttpException('Failed to get orders', HttpStatus.BAD_GATEWAY);
     }
   }
 
+  // ✅ GET a single order by ID
   @Get(':id')
-  public async order(
-    @Param('id', ParseIntPipe) id: number
-  ): Promise<Order> {
+  public async order(@Param('id', ParseIntPipe) id: number): Promise<Order> {
     const found = await this.ordersService.order({ id });
     if (!found) {
       throw new HttpException('Order not found', HttpStatus.NOT_FOUND);
@@ -66,28 +63,30 @@ export class OrdersV1Controller {
     return found;
   }
 
+  // ✅ UPDATE an order
   @Patch(':id')
   public async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() order: UpdateOrderDto,
   ): Promise<Order> {
     try {
-      return await this.ordersService.updateOrder({
+      const updated = await this.ordersService.updateOrder({
         where: { id },
         data: order,
       });
+      return updated;
     } catch (err) {
       this.logger.error(err);
-      throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+      throw new HttpException('Order not found', HttpStatus.NOT_FOUND);
     }
   }
 
+  // ✅ DELETE an order
   @Delete(':id')
-  public async delete(
-    @Param('id', ParseIntPipe) id: number
-  ): Promise<Order> {
+  public async delete(@Param('id', ParseIntPipe) id: number): Promise<Order> {
     try {
-      return await this.ordersService.deleteOrder({ where: { id } });
+      const deleted = await this.ordersService.deleteOrder({ where: { id } });
+      return deleted;
     } catch (err) {
       this.logger.error(err);
       throw new HttpException('Order not found', HttpStatus.NOT_FOUND);

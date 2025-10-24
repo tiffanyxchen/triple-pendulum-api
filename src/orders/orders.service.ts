@@ -1,7 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Order, Prisma } from '@prisma/client';
 import { PrismaService } from '../utils/prisma.service';
-import datadogLogger from '../utils/loggers/datadog';
 import { CreateOrderDto, UpdateOrderDto } from './orders.interface';
 
 @Injectable()
@@ -9,6 +8,7 @@ export class OrdersService {
   constructor(private prisma: PrismaService) {}
   private readonly logger = new Logger(OrdersService.name);
 
+  // ✅ Get all orders
   public async orders(params: {
     skip?: number;
     take?: number;
@@ -18,93 +18,97 @@ export class OrdersService {
   }): Promise<Order[]> {
     const { skip, take, cursor, where, orderBy } = params;
     this.logger.log('GET /v1/orders requested');
-    datadogLogger.info('GET /v1/orders requested');
-    this.logger.log('Got all orders');
     return await this.prisma.order.findMany({
       skip,
       take,
       cursor,
       where,
       orderBy,
+      include: {
+        results: true, // ✅ include results in the returned order
+      },
     });
   }
 
+  // ✅ Get a single order
   public async order(orderWhereUniqueInput: Prisma.OrderWhereUniqueInput): Promise<Order | null> {
-    this.logger.log('Got the one order');
+    this.logger.log(`GET /v1/orders/${orderWhereUniqueInput.id}`);
     return await this.prisma.order.findUnique({
       where: orderWhereUniqueInput,
+      include: {
+        results: true,
+      },
     });
   }
 
+  // ✅ Create a new order
   public async createOrder(data: CreateOrderDto): Promise<Order> {
-    const modifiedOrder = { ...data, createdAt: new Date(), updatedAt: new Date() };
+    const modifiedOrder = {
+      ...data,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
 
-    this.logger.debug(`Made a new order: ${JSON.stringify(modifiedOrder)}`);
+    this.logger.debug(`Creating new order: ${JSON.stringify(modifiedOrder)}`);
 
     const newOrder = await this.prisma.order.create({
       data: {
-        total: modifiedOrder.total,
-        createdAt: modifiedOrder.createdAt,
         userId: modifiedOrder.userId,
+        createdAt: modifiedOrder.createdAt,
         updatedAt: modifiedOrder.updatedAt,
-        products: {
-          connect: modifiedOrder.products.map((product) => ({ id: product.id })),
+        results: {
+          connect: modifiedOrder.results.map((id) => ({ id })), // connect by UUID
         },
+      },
+      include: {
+        results: true,
       },
     });
 
     return newOrder;
   }
 
+  // ✅ Update an existing order
   public async updateOrder(params: {
     where: Prisma.OrderWhereUniqueInput;
     data: UpdateOrderDto;
   }): Promise<Order> {
-    const { data, where } = params;
-    this.logger.log(`Updated existing order ${where.id}`);
+    const { where, data } = params;
+    this.logger.log(`Updating order ${where.id}`);
 
     try {
       const updatedOrder = await this.prisma.order.update({
+        where,
         data: {
-          total: data.total,
-          userId: data.userId,
-          products: {
-            connect: data.products.map((product) => ({ id: product.id })),
-          },
+          ...(data.userId && { userId: data.userId }), // ✅ conditional spread for userId
+          ...(data.results && {
+            results: {
+              connect: data.results.map((id) => ({ id })),
+            },
+          }),
           updatedAt: new Date(),
         },
-        where,
+        include: {
+          results: true,
+        },
       });
 
-      this.logger.log(`Updated for existing order ${updatedOrder.id} successful`);
-
+      this.logger.log(`Order ${updatedOrder.id} updated successfully`);
       return updatedOrder;
     } catch (err) {
-      this.logger.log(`Updated for existing order ${where.id} failed`);
-
+      this.logger.error(`Failed to update order ${where.id}`, err);
       throw new HttpException(err.message, HttpStatus.CONFLICT);
     }
   }
 
+  // ✅ Delete an order
   public async deleteOrder(params: { where: Prisma.OrderWhereUniqueInput }): Promise<Order> {
-    this.logger.log('Deleted existing order');
-    const { where } = params;
+    this.logger.log(`Deleting order ${params.where.id}`);
     return await this.prisma.order.delete({
-      where,
+      where: params.where,
+      include: {
+        results: true,
+      },
     });
   }
-
-  // public async getFeaturedProductsList(): Promise<Product[]> {
-  //   this.logger.log('Got featured products');
-  //   const allOrders = await this.prisma.order.findMany();
-  //   const ordersByQuantity = allOrders.sort((orderA, orderB) => orderA.quantity - orderB.quantity);
-  //   const products: Product[] = ordersByQuantity.map((order) => ({
-  //     name: order.name,
-  //     price: order.total / order.quantity,
-  //     lastOrdered: order.createdAt,
-  //     totalOrders: order.quantity,
-  //     inStock: order.quantity,
-  //   }));
-  //   return products;
-  // }
 }

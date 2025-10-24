@@ -12,15 +12,14 @@ import {
 } from '@nestjs/common';
 import { ResultsService } from './results.service';
 import { Result } from './results.interface';
-import { CreateResultDto } from './results.interface';
-import { UpdateResultDto } from './results.interface';
+import { CreateResultDto, UpdateResultDto } from './results.interface';
 
 @Controller('v1/results')
 export class ResultsV1Controller {
   constructor(private readonly resultsService: ResultsService) {}
   private readonly logger = new Logger(ResultsService.name);
 
-  // CREATE a new Result
+  // ✅ CREATE a new Result
   @Post()
   public async create(@Body() result: CreateResultDto): Promise<Result> {
     if (!result) {
@@ -28,15 +27,14 @@ export class ResultsV1Controller {
     }
 
     try {
-      const newResult = await this.resultsService.createResult(result);
-      return newResult;
+      return await this.resultsService.createResult(result);
     } catch (err) {
-      this.logger.error(err);
+      this.logger.error('Error creating result', err);
       throw new HttpException('Failed to create result', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  // GET all results
+  // ✅ GET all results
   @Get()
   public async results(): Promise<Result[]> {
     try {
@@ -46,12 +44,12 @@ export class ResultsV1Controller {
       }
       return results;
     } catch (err) {
-      this.logger.error(err);
-      throw new HttpException('Generic error', HttpStatus.BAD_GATEWAY);
+      this.logger.error('Error fetching results', err);
+      throw new HttpException('Failed to fetch results', HttpStatus.BAD_GATEWAY);
     }
   }
 
-  // GET a single result by ID
+  // ✅ GET a single result by ID
   @Get(':id')
   public async result(@Param('id') id: string): Promise<Result> {
     try {
@@ -61,12 +59,12 @@ export class ResultsV1Controller {
       }
       return result;
     } catch (err) {
-      this.logger.error(err);
-      throw new HttpException('Generic error', HttpStatus.BAD_GATEWAY);
+      this.logger.error(`Error fetching result with ID ${id}`, err);
+      throw new HttpException('Failed to fetch result', HttpStatus.BAD_GATEWAY);
     }
   }
 
-  // UPDATE a result by ID
+  // ✅ UPDATE a result by ID
   @Patch(':id')
   public async update(
     @Param('id') id: string,
@@ -82,23 +80,23 @@ export class ResultsV1Controller {
       }
       return updated;
     } catch (err) {
-      this.logger.error(err);
-      throw new HttpException('Generic error', HttpStatus.BAD_GATEWAY);
+      this.logger.error(`Error updating result with ID ${id}`, err);
+      throw new HttpException('Failed to update result', HttpStatus.BAD_GATEWAY);
     }
   }
 
-  // DELETE a result by ID
+  // ✅ DELETE a result by ID
   @Delete(':id')
   public async delete(@Param('id') id: string): Promise<Result> {
     try {
-      const deleted = await this.resultsService.deleteResult({ where: { id } });
+      const deleted = await this.resultsService.deleteResult({ id });
       if (!deleted) {
         throw new HttpException('Result not found', HttpStatus.NOT_FOUND);
       }
       return deleted;
     } catch (err) {
-      this.logger.error(err);
-      throw new HttpException('Generic error', HttpStatus.BAD_GATEWAY);
+      this.logger.error(`Error deleting result with ID ${id}`, err);
+      throw new HttpException('Failed to delete result', HttpStatus.BAD_GATEWAY);
     }
   }
 }
