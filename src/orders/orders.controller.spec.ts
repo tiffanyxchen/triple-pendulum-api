@@ -70,11 +70,11 @@ describe('OrdersV1Controller', () => {
   it('should throw 500 if service throws an error', async () => {
     const validOrder = { userId: 1001, results: ['uuid-1'] };
     mockOrdersService.createOrder.mockRejectedValue(
-      new HttpException('Something happened', HttpStatus.INTERNAL_SERVER_ERROR),
+      new HttpException('Failed to create order', HttpStatus.INTERNAL_SERVER_ERROR),
     );
 
     await expect(controller.create(validOrder)).rejects.toThrow(
-      new HttpException('Something happened', HttpStatus.INTERNAL_SERVER_ERROR),
+      new HttpException('Failed to create order', HttpStatus.INTERNAL_SERVER_ERROR),
     );
   });
 });
