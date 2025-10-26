@@ -1,82 +1,127 @@
 import {
-  Body,
   Controller,
   Get,
-  Post,
-  Param,
   Patch,
+  Param,
+  Body,
   Delete,
+  Post,
   HttpException,
   HttpStatus,
   Logger,
-  ParseIntPipe,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { Prisma, User } from '@prisma/client';
+import { ResultsService } from './results.service';
+import { Result, CreateResultDto, UpdateResultDto } from './results.interface';
 
-@Controller('v1/users')
-export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
-  private readonly logger = new Logger(UsersController.name);
+@Controller('v1/results')
+export class ResultsV1Controller {
+  constructor(private readonly resultsService: ResultsService) {}
+  private readonly logger = new Logger(ResultsV1Controller.name);
 
-  // ✅ Create a new user
-  @Post()
-  public async create(@Body() data: Prisma.UserCreateInput): Promise<User> {
-    try {
-      return await this.usersService.createUser(data);
-    } catch (err) {
-      this.logger.error('Failed to create user', err);
-      throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+  // 🐍 SIMULATE OR FETCH EXISTING RESULT
+  @Post('simulate')
+  public async simulateAndSave(@Body() body: CreateResultDto): Promise<Result> {
+    if (!body) {
+      throw new HttpException('No input data', HttpStatus.BAD_REQUEST);
     }
-  }
 
-  // ✅ Get all users
-  @Get()
-  public async getAll(): Promise<User[]> {
+    this.logger.log(
+      `Simulation request received for theta1=${body.theta1_init}, theta2=${body.theta2_init}, theta3=${body.theta3_init}`,
+    );
+
     try {
-      return await this.usersService.users({});
-    } catch (err) {
-      this.logger.error('Failed to get users', err);
-      throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
-
-  // ✅ Get a single user by ID
-  @Get(':id')
-  public async getUser(@Param('id', ParseIntPipe) id: number): Promise<User> {
-    const user = await this.usersService.user({ id });
-    if (!user) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-    }
-    return user;
-  }
-
-  // ✅ Update user
-  @Patch(':id')
-  public async update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() data: Prisma.UserUpdateInput,
-  ): Promise<User> {
-    try {
-      return await this.usersService.updateUser({
-        where: { id },
-        data,
+      return await this.resultsService.simulateOrGetResult({
+        theta1_init: body.theta1_init,
+        theta2_init: body.theta2_init,
+        theta3_init: body.theta3_init,
       });
     } catch (err) {
-      this.logger.error(`Failed to update user ${id}`, err);
-      throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+      this.logger.error('Error during simulation', err);
+      throw new HttpException(
+        'Failed to simulate and save result',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
-  // ✅ Delete user
-  @Delete(':id')
-  public async delete(@Param('id', ParseIntPipe) id: number): Promise<User> {
+  // 🧾 CREATE a new Result directly
+  @Post()
+  public async create(@Body() result: CreateResultDto): Promise<Result> {
+    if (!result) {
+      throw new HttpException('No result data', HttpStatus.BAD_REQUEST);
+    }
+
     try {
-      return await this.usersService.deleteUser({ id });
+      return await this.resultsService.createResult(result);
     } catch (err) {
-      this.logger.error(`Failed to delete user ${id}`, err);
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      this.logger.error('Error creating result', err);
+      throw new HttpException('Failed to create result', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  // 📊 GET all results
+  @Get()
+  public async results(): Promise<Result[]> {
+    try {
+      const results = await this.resultsService.results({});
+      if (!results || results.length === 0) {
+        throw new HttpException('No results found', HttpStatus.NOT_FOUND);
+      }
+      return results;
+    } catch (err) {
+      this.logger.error('Error fetching results', err);
+      throw new HttpException('Failed to fetch results', HttpStatus.BAD_GATEWAY);
+    }
+  }
+
+  // 🔍 GET single result by ID
+  @Get(':id')
+  public async result(@Param('id') id: string): Promise<Result> {
+    try {
+      const result = await this.resultsService.result({ id });
+      if (!result) {
+        throw new HttpException('Result not found', HttpStatus.NOT_FOUND);
+      }
+      return result;
+    } catch (err) {
+      this.logger.error(`Error fetching result with ID ${id}`, err);
+      throw new HttpException('Failed to fetch result', HttpStatus.BAD_GATEWAY);
+    }
+  }
+
+  // ✍️ UPDATE result
+  @Patch(':id')
+  public async update(
+    @Param('id') id: string,
+    @Body() result: UpdateResultDto,
+  ): Promise<Result> {
+    try {
+      const updated = await this.resultsService.updateResult({
+        where: { id },
+        data: result,
+      });
+      if (!updated) {
+        throw new HttpException('Result not found', HttpStatus.NOT_FOUND);
+      }
+      return updated;
+    } catch (err) {
+      this.logger.error(`Error updating result with ID ${id}`, err);
+      throw new HttpException('Failed to update result', HttpStatus.BAD_GATEWAY);
+    }
+  }
+
+  // 🗑 DELETE result
+  @Delete(':id')
+  public async delete(@Param('id') id: string): Promise<Result> {
+    try {
+      const deleted = await this.resultsService.deleteResult({ id });
+      if (!deleted) {
+        throw new HttpException('Result not found', HttpStatus.NOT_FOUND);
+      }
+      return deleted;
+    } catch (err) {
+      this.logger.error(`Error deleting result with ID ${id}`, err);
+      throw new HttpException('Failed to delete result', HttpStatus.BAD_GATEWAY);
     }
   }
 }
-

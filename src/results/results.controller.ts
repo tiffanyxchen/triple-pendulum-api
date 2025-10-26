@@ -11,15 +11,69 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ResultsService } from './results.service';
-import { Result } from './results.interface';
-import { CreateResultDto, UpdateResultDto } from './results.interface';
+import { Result, CreateResultDto, UpdateResultDto } from './results.interface';
+import { runSimulation } from '../utils/python-runner';
 
 @Controller('v1/results')
 export class ResultsV1Controller {
   constructor(private readonly resultsService: ResultsService) {}
-  private readonly logger = new Logger(ResultsService.name);
+  private readonly logger = new Logger(ResultsV1Controller.name);
 
-  // ✅ CREATE a new Result
+  // 🐍 NEW: Run simulation + insert if not exist
+  @Post('simulate')
+  public async simulateAndSave(@Body() body: CreateResultDto): Promise<Result> {
+    if (!body) {
+      throw new HttpException('No input data', HttpStatus.BAD_REQUEST);
+    }
+
+    try {
+      // 1. Check if result already exists in DB
+      const existing = await this.resultsService.findByAngles({
+        theta1_init: body.theta1_init,
+        theta2_init: body.theta2_init,
+        theta3_init: body.theta3_init,
+      });
+
+      if (existing) {
+        this.logger.log(
+          `Found existing result for (${body.theta1_init}, ${body.theta2_init}, ${body.theta3_init}) with ID ${existing.id}`,
+        );
+        return existing;
+      }
+
+      // 2. Run simulation
+      this.logger.log(
+        `Running simulation for theta1=${body.theta1_init}, theta2=${body.theta2_init}, theta3=${body.theta3_init}`,
+      );
+      const simulation = await runSimulation(body);
+
+      // 3. Save to DB
+      const saved = await this.resultsService.createResult({
+        ...body,
+        theta1_series: simulation.theta1_series,
+        theta2_series: simulation.theta2_series,
+        theta3_series: simulation.theta3_series,
+        time: simulation.time,
+        x1: simulation.x1,
+        y1: simulation.y1,
+        x2: simulation.x2,
+        y2: simulation.y2,
+        x3: simulation.x3,
+        y3: simulation.y3,
+      });
+
+      this.logger.log(`Simulation saved successfully with ID: ${saved.id}`);
+      return saved;
+    } catch (err) {
+      this.logger.error('Error during simulation', err);
+      throw new HttpException(
+        'Failed to simulate and save result',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  // 🧾 CREATE a new Result directly
   @Post()
   public async create(@Body() result: CreateResultDto): Promise<Result> {
     if (!result) {
@@ -34,7 +88,7 @@ export class ResultsV1Controller {
     }
   }
 
-  // ✅ GET all results
+  // 📊 GET all results
   @Get()
   public async results(): Promise<Result[]> {
     try {
@@ -49,7 +103,7 @@ export class ResultsV1Controller {
     }
   }
 
-  // ✅ GET a single result by ID
+  // 🔍 GET single result by ID
   @Get(':id')
   public async result(@Param('id') id: string): Promise<Result> {
     try {
@@ -64,7 +118,7 @@ export class ResultsV1Controller {
     }
   }
 
-  // ✅ UPDATE a result by ID
+  // ✍️ UPDATE result
   @Patch(':id')
   public async update(
     @Param('id') id: string,
@@ -85,7 +139,7 @@ export class ResultsV1Controller {
     }
   }
 
-  // ✅ DELETE a result by ID
+  // 🗑 DELETE result
   @Delete(':id')
   public async delete(@Param('id') id: string): Promise<Result> {
     try {
