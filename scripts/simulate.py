@@ -118,13 +118,13 @@ def main():
         "y3": y3.tolist(),
     }
 
-    print(json.dumps(result))
-
     gif_file = animate_and_save(
-    t, x1, y1, x2, y2, x3, y3,
-    theta1_init, theta2_init, theta3_init,
-    L=L
-    )
+        t, x1, y1, x2, y2, x3, y3,
+        theta1_init, theta2_init, theta3_init,
+        L = L
+        )
+    result["gifPath"] = gif_file
+    print(json.dumps(result))
 
 
 if __name__ == "__main__":

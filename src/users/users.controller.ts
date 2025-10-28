@@ -1,127 +1,36 @@
-import {
-  Controller,
-  Get,
-  Patch,
-  Param,
-  Body,
-  Delete,
-  Post,
-  HttpException,
-  HttpStatus,
-  Logger,
-} from '@nestjs/common';
-import { ResultsService } from '../results/results.service';
-import { Result, CreateResultDto, UpdateResultDto } from '../results/results.interface';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import { UsersService } from './users.service';
+import { CreateUserDto, UpdateUserDto } from './users.dto';
+import { User } from './users.interface';
 
-@Controller('v1/results')
-export class ResultsV1Controller {
-  constructor(private readonly resultsService: ResultsService) {}
-  private readonly logger = new Logger(ResultsV1Controller.name);
+@Controller('users')
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
 
-  // 🐍 SIMULATE OR FETCH EXISTING RESULT
-  @Post('simulate')
-  public async simulateAndSave(@Body() body: CreateResultDto): Promise<Result> {
-    if (!body) {
-      throw new HttpException('No input data', HttpStatus.BAD_REQUEST);
-    }
-
-    this.logger.log(
-      `Simulation request received for theta1=${body.theta1_init}, theta2=${body.theta2_init}, theta3=${body.theta3_init}`,
-    );
-
-    try {
-      return await this.resultsService.simulateOrGetResult({
-        theta1_init: body.theta1_init,
-        theta2_init: body.theta2_init,
-        theta3_init: body.theta3_init,
-      });
-    } catch (err) {
-      this.logger.error('Error during simulation', err);
-      throw new HttpException(
-        'Failed to simulate and save result',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  // 🧾 CREATE a new Result directly
-  @Post()
-  public async create(@Body() result: CreateResultDto): Promise<Result> {
-    if (!result) {
-      throw new HttpException('No result data', HttpStatus.BAD_REQUEST);
-    }
-
-    try {
-      return await this.resultsService.createResult(result);
-    } catch (err) {
-      this.logger.error('Error creating result', err);
-      throw new HttpException('Failed to create result', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
-
-  // 📊 GET all results
+  // GET /users
   @Get()
-  public async results(): Promise<Result[]> {
-    try {
-      const results = await this.resultsService.results({});
-      if (!results || results.length === 0) {
-        throw new HttpException('No results found', HttpStatus.NOT_FOUND);
-      }
-      return results;
-    } catch (err) {
-      this.logger.error('Error fetching results', err);
-      throw new HttpException('Failed to fetch results', HttpStatus.BAD_GATEWAY);
-    }
+  public async getUsers(): Promise<User[]> {
+    return await this.usersService.getUsers();
   }
 
-  // 🔍 GET single result by ID
+  // GET /users/:id
   @Get(':id')
-  public async result(@Param('id') id: string): Promise<Result> {
-    try {
-      const result = await this.resultsService.result({ id });
-      if (!result) {
-        throw new HttpException('Result not found', HttpStatus.NOT_FOUND);
-      }
-      return result;
-    } catch (err) {
-      this.logger.error(`Error fetching result with ID ${id}`, err);
-      throw new HttpException('Failed to fetch result', HttpStatus.BAD_GATEWAY);
-    }
+  public async getUser(@Param('id', ParseIntPipe) id: number): Promise<User> {
+    return await this.usersService.getUser(id);
   }
 
-  // ✍️ UPDATE result
-  @Patch(':id')
-  public async update(
-    @Param('id') id: string,
-    @Body() result: UpdateResultDto,
-  ): Promise<Result> {
-    try {
-      const updated = await this.resultsService.updateResult({
-        where: { id },
-        data: result,
-      });
-      if (!updated) {
-        throw new HttpException('Result not found', HttpStatus.NOT_FOUND);
-      }
-      return updated;
-    } catch (err) {
-      this.logger.error(`Error updating result with ID ${id}`, err);
-      throw new HttpException('Failed to update result', HttpStatus.BAD_GATEWAY);
-    }
+  // POST /users
+  @Post()
+  public async createUser(@Body() data: CreateUserDto): Promise<User> {
+    return await this.usersService.createUser(data);
   }
 
-  // 🗑 DELETE result
-  @Delete(':id')
-  public async delete(@Param('id') id: string): Promise<Result> {
-    try {
-      const deleted = await this.resultsService.deleteResult({ id });
-      if (!deleted) {
-        throw new HttpException('Result not found', HttpStatus.NOT_FOUND);
-      }
-      return deleted;
-    } catch (err) {
-      this.logger.error(`Error deleting result with ID ${id}`, err);
-      throw new HttpException('Failed to delete result', HttpStatus.BAD_GATEWAY);
-    }
+  // PUT /users/:id
+  @Put(':id')
+  public async updateUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: UpdateUserDto,
+  ): Promise<User> {
+    return await this.usersService.updateUser(id, data);
   }
 }

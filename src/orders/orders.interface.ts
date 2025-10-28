@@ -1,5 +1,6 @@
 import { IsNotEmpty, IsNumber, IsArray, IsUUID, IsOptional } from 'class-validator';
 import { Prisma } from '@prisma/client';
+import { User } from '../users/users.interface';
 
 //
 // ---------- Prisma Entity Types ----------
@@ -28,14 +29,6 @@ export type Result = {
   userId?: number | null;
 };
 
-// ✅ Matches your Prisma `User` model
-export type User = {
-  id: number;
-  email: string;
-  name: string;
-  address?: string | null;
-  roles: string[];
-};
 
 // ✅ Matches your Prisma `Order` model (no total field)
 export interface Order {

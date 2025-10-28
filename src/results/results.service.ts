@@ -28,7 +28,7 @@ export class ResultsService {
     return this.prisma.result.findUnique({ where });
   }
 
-  // ✅ Find result by angle combination
+  // Find result by angle combination
   public async findByAngles(where: {
     theta1_init: number;
     theta2_init: number;
@@ -105,6 +105,7 @@ export class ResultsService {
           y2: data.y2 as Prisma.InputJsonValue,
           x3: data.x3 as Prisma.InputJsonValue,
           y3: data.y3 as Prisma.InputJsonValue,
+          gifPath: data.gifPath ?? null,   // ✅ NEW
         },
       });
     } catch (err) {
@@ -138,6 +139,7 @@ export class ResultsService {
           y2: data.y2 as Prisma.InputJsonValue,
           x3: data.x3 as Prisma.InputJsonValue,
           y3: data.y3 as Prisma.InputJsonValue,
+          gifPath: data.gifPath ?? undefined,
         },
       });
     } catch (err) {
