@@ -4,7 +4,10 @@ export async function runSimulation(payload: any): Promise<any> {
   return new Promise((resolve, reject) => {
     const jsonString = JSON.stringify(payload);
 
-    const py = spawn('venv/bin/python', ['scripts/simulate.py', jsonString]);
+    // const py = spawn('venv/bin/python', ['scripts/simulate.py', jsonString]);
+    const py = spawn('venv/bin/python', ['scripts/simulate.py', jsonString], {
+      cwd: process.cwd(),  // ← ensures correct working directory
+    });
 
     let data = '';
     let error = '';
@@ -14,6 +17,7 @@ export async function runSimulation(payload: any): Promise<any> {
     });
 
     py.stderr.on('data', (chunk) => {
+      console.error("PYTHON ERROR:", chunk.toString());
       error += chunk.toString();
     });
 

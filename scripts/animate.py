@@ -1,3 +1,4 @@
+import sys
 import os
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -15,7 +16,7 @@ def animate_and_save(t, x1, y1, x2, y2, x3, y3, theta1_init, theta2_init, theta3
     # filename = filename.replace('.', 'p').replace('-', 'm')
     # filename = filename + ".gif"   # ← GIF extension instead of CSV
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    timestamp = datetime.now().strftime("%Y-%m-%d")
 
     results_dir = os.path.join(project_root, "results", timestamp)
     os.makedirs(results_dir, exist_ok=True)
@@ -25,7 +26,7 @@ def animate_and_save(t, x1, y1, x2, y2, x3, y3, theta1_init, theta2_init, theta3
     safe_base = base.replace('.', 'p').replace('-', 'm')
     filename = os.path.join(results_dir, safe_base + ".gif")
 
-    print(f"Saving animation to {filename}")
+    print(f"Saving animation to {filename}", file = sys.stderr)
 
     # -----------------------------
     # Plot setup
@@ -55,6 +56,6 @@ def animate_and_save(t, x1, y1, x2, y2, x3, y3, theta1_init, theta2_init, theta3
     ani = animation.FuncAnimation(fig, animate, frames=len(t), interval=25, init_func=init, blit=True)
 
     ani.save(filename, writer=animation.PillowWriter(fps=30))
-    print(f"✅ GIF saved: {filename}")
+    print(f"✅ GIF saved: {filename}", file=sys.stderr)
 
     return filename   # So simulation.py can store it in the DB
