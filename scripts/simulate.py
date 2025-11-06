@@ -28,6 +28,7 @@ import sys
 import json
 import numpy as np
 import scipy.integrate as integrate
+from animate import animate_and_save
 
 g = 9.8  # acceleration due to gravity
 L = 1.0  # length of pendulums
@@ -118,6 +119,12 @@ def main():
     }
 
     print(json.dumps(result))
+
+    gif_file = animate_and_save(
+    t, x1, y1, x2, y2, x3, y3,
+    theta1_init, theta2_init, theta3_init,
+    L=L
+    )
 
 
 if __name__ == "__main__":
