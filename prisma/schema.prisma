@@ -44,7 +44,7 @@ model Result {
   theta2_series Json
   theta3_init   Float
   theta3_series Json
-
+  gifPath       String?
   orders Order[]
 
   @@unique([theta1_init, theta2_init, theta3_init])
