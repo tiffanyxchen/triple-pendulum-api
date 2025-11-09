@@ -20,6 +20,7 @@ export interface Result {
   y3: Prisma.JsonValue;
   createdAt: Date;
   updatedAt: Date;
+  gifPath?: string|null;
 }
 
 // ✅ DTO for creating a new result (WRITE)
@@ -50,6 +51,9 @@ export class CreateResultDto {
   y2: Prisma.InputJsonValue;
   x3: Prisma.InputJsonValue;
   y3: Prisma.InputJsonValue;
+  @IsOptional()
+  @IsString()
+  gifPath?: string|null;
 }
 
 // ✅ DTO for updating a result (WRITE)
@@ -99,4 +103,8 @@ export class UpdateResultDto {
 
   @IsOptional()
   y3?: Prisma.InputJsonValue;
+
+  @IsOptional()
+  @IsString()
+  gifPath?: string|null;
 }

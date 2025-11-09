@@ -13,11 +13,11 @@
     "target": "ES2023",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
+    "baseUrl": "./src",
     "paths": {                 
-      "@utils/*": ["src/utils/*"],
-      "@services/*": ["src/*/*.service.ts"],
-      "@controllers/*": ["src/*/*.controller.ts"]
+      "@utils/*": ["utils/*"],
+      "@services/*": ["*/"],
+      "@controllers/*": ["*/"]
     },
 
     "incremental": true,

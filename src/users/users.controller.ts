@@ -10,8 +10,8 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import { ResultsService } from './results.service';
-import { Result, CreateResultDto, UpdateResultDto } from './results.interface';
+import { ResultsService } from '../results/results.service';
+import { Result, CreateResultDto, UpdateResultDto } from '../results/results.interface';
 
 @Controller('v1/results')
 export class ResultsV1Controller {

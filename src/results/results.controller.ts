@@ -10,8 +10,8 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import { ResultsService } from './results.service';
-import { Result, CreateResultDto, UpdateResultDto } from './results.interface';
+import { ResultsService } from '../results/results.service';
+import { Result, CreateResultDto, UpdateResultDto } from '../results/results.interface';
 import { runSimulation } from '../utils/python-runner';
 
 @Controller('v1/results')
@@ -60,6 +60,7 @@ export class ResultsV1Controller {
         y2: simulation.y2,
         x3: simulation.x3,
         y3: simulation.y3,
+        gifPath: simulation.gifPath ?? null
       });
 
       this.logger.log(`Simulation saved successfully with ID: ${saved.id}`);
