@@ -28,7 +28,7 @@ model Order {
 
 model Result {
   id            String   @id @default(uuid())
-  name          String    @default("Untitled")
+  name          String   @default("Untitled")
   time          Json
   x1            Json
   y1            Json
@@ -37,7 +37,7 @@ model Result {
   x3            Json
   y3            Json
   createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
   theta1_init   Float
   theta1_series Json
   theta2_init   Float
@@ -45,7 +45,7 @@ model Result {
   theta3_init   Float
   theta3_series Json
   gifPath       String?
-  orders Order[]
+  orders        Order[]
 
   @@unique([theta1_init, theta2_init, theta3_init])
 }

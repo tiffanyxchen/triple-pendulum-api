@@ -2,6 +2,7 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
+from datetime import datetime
 
 def animate_and_save(t, x1, y1, x2, y2, x3, y3, theta1_init, theta2_init, theta3_init, L=1.0):
     dt = t[1] - t[0]
@@ -9,11 +10,20 @@ def animate_and_save(t, x1, y1, x2, y2, x3, y3, theta1_init, theta2_init, theta3
     # -----------------------------
     # Create output directory + filename
     # -----------------------------
-    os.makedirs("results", exist_ok=True)
+    # os.makedirs("results", exist_ok=True)
+    # filename = f"results/results_{theta1_init:.2f}_{theta2_init:.2f}_{theta3_init:.2f}"
+    # filename = filename.replace('.', 'p').replace('-', 'm')
+    # filename = filename + ".gif"   # ← GIF extension instead of CSV
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
-    filename = f"results/results_{theta1_init:.2f}_{theta2_init:.2f}_{theta3_init:.2f}"
-    filename = filename.replace('.', 'p').replace('-', 'm')
-    filename = filename + ".gif"   # ← GIF extension instead of CSV
+    results_dir = os.path.join(project_root, "results", timestamp)
+    os.makedirs(results_dir, exist_ok=True)
+
+    # Build a safe filename (only modify the name itself, not the path)
+    base = f"results_{theta1_init:.2f}_{theta2_init:.2f}_{theta3_init:.2f}"
+    safe_base = base.replace('.', 'p').replace('-', 'm')
+    filename = os.path.join(results_dir, safe_base + ".gif")
 
     print(f"Saving animation to {filename}")
 
