@@ -25,6 +25,7 @@ def animate_and_save(t, x1, y1, x2, y2, x3, y3, theta1_init, theta2_init, theta3
     base = f"results_{theta1_init:.2f}_{theta2_init:.2f}_{theta3_init:.2f}"
     safe_base = base.replace('.', 'p').replace('-', 'm')
     filename = os.path.join(results_dir, safe_base + ".gif")
+    relativeUrl = os.path.join( "results", timestamp, safe_base + ".gif")
 
     print(f"Saving animation to {filename}", file = sys.stderr)
 
@@ -58,4 +59,4 @@ def animate_and_save(t, x1, y1, x2, y2, x3, y3, theta1_init, theta2_init, theta3
     ani.save(filename, writer=animation.PillowWriter(fps=30))
     print(f"✅ GIF saved: {filename}", file=sys.stderr)
 
-    return filename   # So simulation.py can store it in the DB
+    return relativeUrl   # So simulation.py can store it in the DB

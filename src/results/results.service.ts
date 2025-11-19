@@ -60,7 +60,20 @@ export class ResultsService {
     // 2. Run Python simulation
     this.logger.log('No result found — running simulation');
     const simData = await runSimulation(angles);
+    /*
+    // 3. CONVERT ABSOLUTE FILE PATH → PUBLIC URL
+    // ----------------------------------------
+    let relativeGifPath: string | null = null;
 
+    if (simData.gifPath) {
+      // simData.gifPath = "/Users/star/Desktop/triple-pendulum/results/2025-11-21/results_0p50_0p40_0p80.gif"
+      const parts = simData.gifPath.split("/results/");
+      if (parts.length > 1) {
+        const rel = parts[1];  // "2025-11-21/results_..."
+        relativeGifPath = `/results/${rel}`;
+      }
+    }
+    */
     // 3. Insert new record into database
     const newResult = await this.prisma.result.create({
       data: {
@@ -78,6 +91,8 @@ export class ResultsService {
         y2: simData.y2 as Prisma.InputJsonValue,
         x3: simData.x3 as Prisma.InputJsonValue,
         y3: simData.y3 as Prisma.InputJsonValue,
+        // ⭐ ADD THIS ⭐
+        gifPath: simData.gifPath,
       },
     });
 

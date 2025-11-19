@@ -8,13 +8,14 @@ import { ResultsModule } from './results/results.module';
 
 @Module({
   imports: [
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'results'),  // serve TRIPLE-PENDULUM/results/
-      serveRoot: '/results',                       // URL prefix: http://localhost:3000/results/...
-    }),
-    UsersModule,   // ← REQUIRED
+    UsersModule,  
     OrdersModule,
     ResultsModule,
+
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'results'),  // serve TRIPLE-PENDULUM/results/
+      serveRoot: '/results',                             // URL prefix: http://localhost:3000/results/...
+    }),
   ],
 })
 export class AppModule {}
