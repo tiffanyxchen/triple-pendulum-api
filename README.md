@@ -44,7 +44,7 @@ This backend powers the **triple-pendulum-frontend** React/Vite application.
 
 ---
 
-## 📁 Project Structure
+## 📁 Project Structure (Simplified)
 ```
 triple-pendulum-api/
 ├── src/
