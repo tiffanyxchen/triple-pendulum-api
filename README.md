@@ -45,51 +45,54 @@ This backend powers the **triple-pendulum-frontend** React/Vite application.
 ---
 
 ## 📁 Project Structure
-triple-pendulum-api/
-│── src/
-│   ├── results/
-│   │   ├── results.controller.ts     # REST endpoints
-│   │   ├── results.service.ts        # business logic + simulateOrGetResult
-│   │   ├── results.interface.ts      # DTOs and types
-│   │   ├── results.module.ts         # Nest module
-│   ├── users/
-│   │   ├── users.controller.ts
-│   │   ├── users.service.ts
-│   │   └── users.module.ts
-│   ├── utils/
-│   │   ├── python-runner.ts          # runs Python simulation
-│   │   ├── prisma.service.ts         # Prisma client wrapper
-│   │   └── logger.ts                 # (optional) logging helper
-│   ├── middleware/
-│   ├── filters/
-│   ├── app.module.ts
-│   ├── main.ts                       # entrypoint
+```triple-pendulum-api/
+├── src/
+│ ├── results/
+│ │ ├── results.controller.ts # REST endpoints
+│ │ ├── results.service.ts # business logic + simulateOrGetResult
+│ │ ├── results.interface.ts # DTOs and types
+│ │ └── results.module.ts # NestJS module
+│
+│ ├── users/
+│ │ ├── users.controller.ts
+│ │ ├── users.service.ts
+│ │ └── users.module.ts
+│
+│ ├── utils/
+│ │ ├── python-runner.ts # runs Python simulation
+│ │ ├── prisma.service.ts # Prisma client wrapper
+│ │ └── logger.ts # (optional) logging helper
+│
+│ ├── middleware/
+│ ├── filters/
+│ ├── app.module.ts
+│ └── main.ts # entrypoint
 │
 ├── python/
-│   ├── simulate.py                   # core physics simulation
-│   ├── animate.py                    # GIF creation
+│ ├── simulate.py # core physics simulation
+│ └── animate.py # GIF creation
 │
 ├── results/
-│   ├── <uuid>/pendulum.gif           # GIF output
-│   └── <uuid>/result.json            # raw simulation data
+│ ├── <uuid>/pendulum.gif
+│ └── <uuid>/result.json
 │
 ├── prisma/
-│   ├── schema.prisma                 # Prisma schema
-│   └── migrations/
-│       ├── 20250101_init/
-│       └── ...
+│ ├── schema.prisma
+│ └── migrations/
+│ └── 20250101_init/
 │
 ├── test/
-│   ├── results.service.spec.ts
-│   └── e2e/...
+│ ├── results.service.spec.ts
+│ └── e2e/
 │
 ├── scripts/
-│   ├── seed.ts
-│   └── dev.sh
+│ ├── seed.ts
+│ └── dev.sh
 │
-├── .env.example                       # safe template
+├── .env.example
 ├── .gitignore
 ├── package.json
 └── README.md
+```
 
 
